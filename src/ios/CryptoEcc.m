@@ -49,8 +49,8 @@
         AGKeyPair *keyPair = [[AGKeyPair alloc] init];
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
-        [results setValue:[NSString [self convertDataToString:.keyPair.privateKey]] forKey:@"privateKey"];
-        [results setValue:[NSNumber [self convertDataToString:.keyPair.publicKey]] forKey:@"publicKey"];
+        [results setValue:[NSString [self convertDataToString:keyPair.privateKey]] forKey:@"privateKey"];
+        [results setValue:[NSString [self convertDataToString:keyPair.publicKey]] forKey:@"publicKey"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
