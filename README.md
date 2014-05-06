@@ -1,2 +1,2 @@
-cordova-crypto-ecc
-==================
+Cordova Crypto Ecc Plugin
+======================

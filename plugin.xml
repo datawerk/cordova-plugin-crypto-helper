@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="de.datawerk.cordova.crypto-ecc"
+        version="1.0.0">
+
+  <name>Crypto ECC Plugin</name>
+
+  <description>
+    This plugin allows using crypto from a native implementation
+  </description>
+
+  <license>MIT</license>
+
+  <engines>
+    <engine name="cordova" version=">=3.1.0"/>
+  </engines>
+
+  <js-module src="www/crypto-ecc.js" name="CryptoEcc">
+    <clobbers target="CryptoEcc"/>
+  </js-module>
+    
+  <!-- android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="cryptoEcc">
+          <param name="android-package" value="org.jboss.aerogear.cordova.crypto.CryptoPlugin" />
+      </feature>
+    </config-file>
+
+    <source-file src="src/android/org/jboss/aerogear/cordova/crypto/CryptoPlugin.java" target-dir="src/org/jboss/aerogear/cordova/crypto/"/>
+    
+    <source-file src="src/android/libs/aerogear-crypto-0.1.0-SNAPSHOT.jar" target-dir="libs"/>
+    <source-file src="src/android/libs/sc-light-jdk15on-1.47.0.3.jar" target-dir="libs"/>
+    <source-file src="src/android/libs/scprov-jdk15on-1.47.0.3.jar" target-dir="libs"/>
+    <source-file src="src/android/libs/bcprov-jdk15on-1.48.jar" target-dir="libs"/>
+  </platform>
+
+  <!-- ios -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="cryptoEcc">
+        <param name="ios-package" value="CryptoEcc"/>
+      </feature>
+    </config-file>
+
+	<source-file src="src/ios/libs/libcrypto-sdk.a" framework="true" />
+
+    <header-file src="src/ios/AeroGearCrypto.h"/>
+    <header-file src="src/ios/AGCryptoBox.h"/>
+    <header-file src="src/ios/AGHash.h"/>
+    <header-file src="src/ios/AGKeyPair.h"/>
+    <header-file src="src/ios/AGPBKDF2.h"/>
+    <header-file src="src/ios/AGRandomGenerator.h"/>
+    <header-file src="src/ios/AGSecretBox.h"/>
+    <header-file src="src/ios/AGSigningKey.h"/>
+    <header-file src="src/ios/AGUtil.h"/>
+    <header-file src="src/ios/AGVerifyKey.h"/>
+    
+    <header-file src="src/ios/libsodium-ios/sodium/crypto_box_curve25519xsalsa20poly1305.h" target-dir="libsodium-ios/sodium"/>
+	<header-file src="src/ios/libsodium-ios/sodium/export.h" target-dir="libsodium-ios/sodium"/>
+
+	<source-file src="src/ios/CryptoPlugin.m"/>
+    <header-file src="src/ios/CryptoPlugin.h"/>
+  </platform>
+
+</plugin>
