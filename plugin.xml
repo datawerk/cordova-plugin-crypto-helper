@@ -60,8 +60,8 @@
     <header-file src="src/ios/libsodium-ios/sodium/crypto_box_curve25519xsalsa20poly1305.h" target-dir="libsodium-ios/sodium"/>
 	<header-file src="src/ios/libsodium-ios/sodium/export.h" target-dir="libsodium-ios/sodium"/>
 
-	<source-file src="src/ios/CryptoPlugin.m"/>
-    <header-file src="src/ios/CryptoPlugin.h"/>
+	<source-file src="src/ios/CryptoEcc.m"/>
+    <header-file src="src/ios/CryptoEcc.h"/>
   </platform>
 
 </plugin>
