@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="de.datawerk.cordova.crypto-ecc"
+        id="de.datawerk.cordova.cryptoecc"
         version="1.0.0">
 
   <name>Crypto ECC Plugin</name>
@@ -24,12 +24,22 @@
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="cryptoEcc">
-          <param name="android-package" value="org.jboss.aerogear.cordova.crypto.CryptoPlugin" />
+      	  <param name="android-package" value="de.datawerk.cordova.cryptoecc.CryptoEcc" />
       </feature>
     </config-file>
 
-    <source-file src="src/android/org/jboss/aerogear/cordova/crypto/CryptoPlugin.java" target-dir="src/org/jboss/aerogear/cordova/crypto/"/>
-    
+    <source-file src="src/android/com/neilalexander/jnacl/NaCl.java" target-dir="src/com/neilalexander/jnacl/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/curve25519.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/curve25519xsalsa20poly1305.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/hsalsa20.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/poly1305.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/salsa20.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/verify_16.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/xsalsa20.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+    <source-file src="src/android/com/neilalexander/jnacl/crypto/xsalsa20poly1305.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
+        	
+	<source-file src="src/android/de/datawerk/cordova/cryptoecc/CryptoEcc.java" target-dir="src/de/datawerk/cordova/cryptoecc/"/>	
+        
     <source-file src="src/android/libs/aerogear-crypto-0.1.0-SNAPSHOT.jar" target-dir="libs"/>
     <source-file src="src/android/libs/sc-light-jdk15on-1.47.0.3.jar" target-dir="libs"/>
     <source-file src="src/android/libs/scprov-jdk15on-1.47.0.3.jar" target-dir="libs"/>
