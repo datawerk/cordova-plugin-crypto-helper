@@ -1,7 +1,7 @@
 Cordova Crypto Ecc Plugin
 ======================
 
-This plugin was forked from https://github.com/aerogear/aerogear-crypto-cordova and it is intend to support ecc ( http://de.wikipedia.org/wiki/Elliptic_Curve_Cryptography) for iOS and Android.
+This plugin was forked from https://github.com/aerogear/aerogear-crypto-cordova and it is intend to support ecc (http://de.wikipedia.org/wiki/Elliptic_Curve_Cryptography) for iOS and Android.
 
 It relies on the "curve25519xsalsa20poly1305" curve and aimed to have a simple interface and compatibility between iOS and Android.
 
@@ -15,11 +15,11 @@ Work in Progress, use at your own risk!
 
 ### iOS
 - removed coocoapods dependency
-- added static lib from https://github.com/aerogear/aerogear-crypto-ios
-- added additional headers from https://github.com/mochtu/libsodium-ios
+- added static lib from https://github.com/aerogear/aerogear-crypto-ios/commit/ae4383028effc241e148cb7cfb68fcf58d558d64
+- added additional headers from https://github.com/mochtu/libsodium-ios/commit/3b4b97938aaa11c95fa6987e3a08f9c131ce77e6
  
 ### Android
-- added jnacl from https://github.com/DATAWERK/jnacl (initial created by Neil Alexander)
+- added jnacl from https://github.com/DATAWERK/jnacl/commit/c0af0ed3ddd4aa3666a1baa7f16f7113d3e3c08f (initial created by Neil Alexander)
 
 ## API
 
