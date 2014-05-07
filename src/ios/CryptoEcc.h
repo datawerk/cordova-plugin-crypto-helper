@@ -20,11 +20,12 @@
 
 
 @interface CryptoEcc : CDVPlugin {
-
+    
 }
 
 - (void)getRandomValue:(CDVInvokedUrlCommand*)command;
 - (void)deriveKey:(CDVInvokedUrlCommand*)command;
+- (void)validateKey:(CDVInvokedUrlCommand*)command;
 - (void)generateKeyPair:(CDVInvokedUrlCommand*)command;
 - (void)encrypt:(CDVInvokedUrlCommand*)command;
 - (void)decrypt:(CDVInvokedUrlCommand*)command;

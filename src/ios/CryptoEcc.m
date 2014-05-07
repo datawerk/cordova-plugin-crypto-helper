@@ -39,10 +39,11 @@
 - (void)deriveKey:(CDVInvokedUrlCommand *)command {
     NSMutableDictionary *options = [self parseParameters:command];
     NSString *password = [options objectForKey:@"password"];
+    NSString *salt = [options objectForKey:@"salt"];
     
     [self.commandDelegate runInBackground:^{
         AGPBKDF2 *agpbkdf2 = [[AGPBKDF2 alloc] init];
-        NSData *rawPassword = [agpbkdf2 deriveKey:password];
+        NSData *rawPassword = [agpbkdf2 deriveKey:password salt:[self convertStringToData:salt]];
         
         NSString *encodedPassword = [self convertDataToString:rawPassword];
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedPassword];
@@ -50,8 +51,22 @@
     }];
 }
 
-- (void)generateKeyPair:(CDVInvokedUrlCommand *)command {
+- (void)validateKey:(CDVInvokedUrlCommand *)command {
+    NSMutableDictionary *options = [self parseParameters:command];
+    NSString *password = [options objectForKey:@"password"];
+    NSString *encryptedPassword = [options objectForKey:@"encryptedPassword"];
+    NSString *salt = [options objectForKey:@"salt"];
     
+    [self.commandDelegate runInBackground:^{
+        AGPBKDF2 *agpbkdf2 = [[AGPBKDF2 alloc] init];
+        BOOL valid = [agpbkdf2 validate:password encryptedPassword:[self convertStringToData:encryptedPassword] salt:[self convertStringToData:salt]];
+        
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:valid];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+}
+
+- (void)generateKeyPair:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         AGKeyPair *keyPair = [[AGKeyPair alloc] init];
         
