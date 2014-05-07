@@ -23,7 +23,14 @@
 @implementation CryptoEcc
 
 - (void)getRandomValue:(CDVInvokedUrlCommand *)command {
-    NSData * data = [AGRandomGenerator randomBytes];
+    NSMutableDictionary *options = [self parseParameters:command];
+    size_t len = 16;
+    NSString *length = [options objectForKey:@"length"];
+    if(length != nil) {
+        len = [length intValue];
+    }
+    
+    NSData *data = [AGRandomGenerator randomBytes:len];
     NSString *value = [self convertDataToString:data];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:value];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -49,8 +56,8 @@
         AGKeyPair *keyPair = [[AGKeyPair alloc] init];
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
-        [results setValue:[NSString [self convertDataToString:keyPair.privateKey]] forKey:@"privateKey"];
-        [results setValue:[NSString [self convertDataToString:keyPair.publicKey]] forKey:@"publicKey"];
+        [results setValue:[self convertDataToString:keyPair.privateKey] forKey:@"privateKey"];
+        [results setValue:[self convertDataToString:keyPair.publicKey] forKey:@"publicKey"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
