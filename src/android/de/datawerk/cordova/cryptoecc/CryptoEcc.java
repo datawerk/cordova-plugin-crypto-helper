@@ -98,8 +98,8 @@ public class CryptoEcc extends CordovaPlugin {
 					curve25519xsalsa20poly1305.crypto_box_keypair(pk, sk);
 					final JSONObject object = new JSONObject();
 					try {
-						object.put("privateKey", NaCl.asHex(pk));
-						object.put("publicKey", NaCl.asHex(sk));
+						object.put("privateKey", NaCl.asHex(sk));
+						object.put("publicKey", NaCl.asHex(pk));
 					} catch (JSONException e) {
 						throw new RuntimeException("could not construct key pair object");
 					}
