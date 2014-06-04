@@ -16,6 +16,7 @@
  */
 package de.datawerk.cordova.cryptoecc;
 
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
@@ -139,6 +140,30 @@ public class CryptoEcc extends CordovaPlugin {
 			});
 		}
         
+        	if ("md5".equals(action)) {
+			final JSONObject params = parseParameters(args);
+			final String data = params.getString("data");
+
+			cordova.getThreadPool().execute(new Runnable() {
+				public void run() {
+					
+					try {
+						MessageDigest md = MessageDigest.getInstance("MD5");
+						md.update(data.getBytes());
+						byte[] digest = md.digest();
+						StringBuffer sb = new StringBuffer();
+						for (byte b : digest) {
+							sb.append(String.format("%02x", b & 0xff));
+						}
+						
+						callbackContext.success(sb.toString());
+					} catch (Exception e) {
+						callbackContext.error(e.getMessage());
+					}
+				}
+			});
+		}
+		
 		return true;
 	}
     
