@@ -55,6 +55,8 @@
     </config-file>
 
 	<source-file src="src/ios/libs/libcrypto-sdk.a" framework="true" />
+	<source-file src="src/ios/libs/libPods.a" framework="true" />
+	<source-file src="src/ios/libs/libPods-libsodium-ios.a" framework="true" />
 
     <header-file src="src/ios/AeroGearCrypto.h"/>
     <header-file src="src/ios/AGCryptoBox.h"/>
