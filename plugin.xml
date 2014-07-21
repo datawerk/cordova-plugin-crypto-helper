@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="de.datawerk.cordova.cryptoecc"
+        id="de.datawerk.cordova.plugin.cryptohelper"
         version="1.0.0">
 
-  <name>Crypto ECC Plugin</name>
+  <name>Crypto Helper Plugin</name>
 
   <description>
     This plugin allows using crypto from a native implementation
@@ -16,15 +16,15 @@
     <engine name="cordova" version=">=3.1.0"/>
   </engines>
 
-  <js-module src="www/crypto-ecc.js" name="CryptoEcc">
-    <clobbers target="CryptoEcc"/>
+  <js-module src="www/crypto-helper.js" name="CryptoHelper">
+    <clobbers target="CryptoHelper"/>
   </js-module>
     
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="cryptoEcc">
-      	  <param name="android-package" value="de.datawerk.cordova.cryptoecc.CryptoEcc" />
+      <feature name="cryptoHelper">
+      	  <param name="android-package" value="de.datawerk.cordova.plugin.cryptohelper.CryptoHelper" />
       </feature>
     </config-file>
 
@@ -38,7 +38,7 @@
     <source-file src="src/android/com/neilalexander/jnacl/crypto/xsalsa20.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
     <source-file src="src/android/com/neilalexander/jnacl/crypto/xsalsa20poly1305.java" target-dir="src/com/neilalexander/jnacl/crypto/"/>
         	
-	<source-file src="src/android/de/datawerk/cordova/cryptoecc/CryptoEcc.java" target-dir="src/de/datawerk/cordova/cryptoecc/"/>	
+	<source-file src="src/android/de/datawerk/cordova/plugin/cryptohelper/CryptoHelper.java" target-dir="src/de/datawerk/cordova/plugin/cryptohelper/"/>	
         
     <source-file src="src/android/libs/aerogear-crypto-0.1.0-SNAPSHOT.jar" target-dir="libs"/>
     <source-file src="src/android/libs/sc-light-jdk15on-1.47.0.3.jar" target-dir="libs"/>
@@ -49,8 +49,8 @@
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
-      <feature name="cryptoEcc">
-        <param name="ios-package" value="CryptoEcc"/>
+      <feature name="cryptoHelper">
+        <param name="ios-package" value="CryptoHelper"/>
       </feature>
     </config-file>
 
@@ -72,8 +72,8 @@
     <header-file src="src/ios/libsodium-ios/sodium/crypto_box_curve25519xsalsa20poly1305.h" target-dir="libsodium-ios/sodium"/>
 	<header-file src="src/ios/libsodium-ios/sodium/export.h" target-dir="libsodium-ios/sodium"/>
 
-	<source-file src="src/ios/CryptoEcc.m"/>
-    <header-file src="src/ios/CryptoEcc.h"/>
+	<source-file src="src/ios/CryptoHelper.m"/>
+    <header-file src="src/ios/CryptoHelper.h"/>
   </platform>
 
 </plugin>
