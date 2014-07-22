@@ -1,27 +1,11 @@
-/*
- * JBoss, Home of Professional Open Source.
- * Copyright Red Hat, Inc., and individual contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#import "CryptoEcc.h"
+#import "CryptoHelper.h"
 #import "AGPBKDF2.h"
 #import "AGCryptoBox.h"
 #import "AGRandomGenerator.h"
 #import <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonCryptor.h>
 
-@implementation CryptoEcc
+@implementation CryptoHelper
 
 - (void)getRandomValue:(CDVInvokedUrlCommand *)command {
     NSMutableDictionary *options = [self parseParameters:command];
@@ -114,6 +98,88 @@
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
+}
+
+- (void)symmetricEncrypt:(CDVInvokedUrlCommand *)command {
+    NSMutableDictionary *options = [self parseParameters:command];
+    NSString *key = [options objectForKey:@"key"];
+    NSString *data = [options objectForKey:@"data"];
+    
+    NSData *dataRaw = [data dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *keyRaw = [self convertStringToData:key];
+    NSData *iv = [AGRandomGenerator randomBytes:16];
+    
+    size_t outLength;
+    size_t availableAESSize = dataRaw.length+kCCBlockSizeAES128-(dataRaw.length % kCCBlockSizeAES128);
+    NSMutableData *cipherData = [NSMutableData dataWithLength:availableAESSize];
+    
+    CCCryptorStatus cryptorResult = CCCrypt(kCCEncrypt, // operation
+                                            kCCAlgorithmAES, // Algorithm
+                                            kCCOptionPKCS7Padding, // options
+                                            keyRaw.bytes, // key
+                                            keyRaw.length, // keylength
+                                            iv.bytes,// iv
+                                            dataRaw.bytes, // dataIn
+                                            dataRaw.length, // dataInLength,
+                                            cipherData.mutableBytes, // dataOut
+                                            cipherData.length, // dataOutAvailable
+                                            &outLength); // dataOutMoved
+    
+    
+    if (cryptorResult == kCCSuccess) {
+        cipherData.length = outLength;
+        
+        NSMutableDictionary *results = [NSMutableDictionary dictionary];
+        [results setValue:[self convertDataToString:cipherData.bytes] forKey:@"result"];
+        [results setValue:[self convertDataToString:iv] forKey:@"IV"];
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+    }
+}
+
+- (void)symmetricDecrypt:(CDVInvokedUrlCommand *)command {
+    NSMutableDictionary *options = [self parseParameters:command];
+    NSString *key = [options objectForKey:@"key"];
+    NSString *data = [options objectForKey:@"data"];
+    NSString *iv = [options objectForKey:@"IV"];
+    
+    NSData *dataRaw = [self convertStringToData:data];
+    NSData *keyRaw = [self convertStringToData:key];
+    NSData *ivRaw = [self convertStringToData:iv];
+    
+    size_t outLength;
+    size_t availableAESSize = dataRaw.length-(dataRaw.length % kCCBlockSizeAES128);
+    NSMutableData *cipherData = [NSMutableData dataWithLength:availableAESSize];
+    
+    CCCryptorStatus cryptorResult = CCCrypt(kCCDecrypt, // operation
+                                            kCCAlgorithmAES, // Algorithm
+                                            kCCOptionPKCS7Padding, // options
+                                            keyRaw.bytes, // key
+                                            keyRaw.length, // keylength
+                                            ivRaw.bytes,// iv
+                                            dataRaw.bytes, // dataIn
+                                            dataRaw.length, // dataInLength,
+                                            cipherData.mutableBytes, // dataOut
+                                            cipherData.length, // dataOutAvailable
+                                            &outLength); // dataOutMoved
+    
+    
+    if (cryptorResult == kCCSuccess) {
+        cipherData.length = outLength;
+        
+        NSString *result = [self convertDataToString:cipherData.bytes];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+    }
 }
 
 - (void)md5:(CDVInvokedUrlCommand *)command {
