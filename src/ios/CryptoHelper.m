@@ -73,12 +73,18 @@
     
     AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[self convertStringToData:publicKey] privateKey:[self convertStringToData:privateKey]];
     [self.commandDelegate runInBackground:^{
+        NSError *error = nil;
         NSData *message = [data dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *result = [cryptoBox encrypt:message nonce:[self convertStringToData:nonce] error:&error];
         
-        NSData *result = [cryptoBox encrypt:message nonce:[self convertStringToData:nonce] error:nil];
-        NSString *encodedResult = [self convertDataToString:result];
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        if(error == nil) {
+            NSString *encodedResult = [self convertDataToString:result];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
     }];
 }
 
@@ -91,12 +97,18 @@
     
     AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[self convertStringToData:publicKey] privateKey:[self convertStringToData:privateKey]];
     [self.commandDelegate runInBackground:^{
+        NSError *error = nil;
         NSData *message = [self convertStringToData:data];
+        NSData *result = [cryptoBox decrypt:message nonce:[self convertStringToData:nonce] error:&error];
         
-        NSData *result = [cryptoBox decrypt:message nonce:[self convertStringToData:nonce] error:nil];
-        NSString *encodedResult = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        if(error == nil) {
+            NSString *encodedResult = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
     }];
 }
 
@@ -138,7 +150,6 @@
     } else {
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        
     }
 }
 
