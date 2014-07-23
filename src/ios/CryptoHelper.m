@@ -142,7 +142,7 @@
         cipherData.length = outLength;
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
-        [results setValue:[self convertDataToString:cipherData.bytes] forKey:@"result"];
+        [results setValue:[self convertDataToString:cipherData] forKey:@"result"];
         [results setValue:[self convertDataToString:iv] forKey:@"IV"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
@@ -183,7 +183,8 @@
     if (cryptorResult == kCCSuccess) {
         cipherData.length = outLength;
         
-        NSString *result = [self convertDataToString:cipherData.bytes];
+        NSString *result = [[NSString alloc] initWithData:cipherData encoding:NSUTF8StringEncoding];
+        //[self convertDataToString:cipherData];
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {

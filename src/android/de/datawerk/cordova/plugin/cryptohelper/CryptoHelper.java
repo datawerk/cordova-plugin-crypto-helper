@@ -190,7 +190,7 @@ public class CryptoHelper extends CordovaPlugin {
 			});
 		}
         
-		if ("symmetric-encrypt".equals(action)) {
+		if ("symmetricEncrypt".equals(action)) {
 			Log.d(LOG_TAG, "symmetric-encrypt called");
 			
 			cordova.getThreadPool().execute(new Runnable() {
@@ -226,7 +226,7 @@ public class CryptoHelper extends CordovaPlugin {
 			});
 		}
 		
-		if ("symmetric-decrypt".equals(action)) {
+		if ("symmetricDecrypt".equals(action)) {
 			Log.d(LOG_TAG, "symmetric-decrypt called");
 			
 			cordova.getThreadPool().execute(new Runnable() {
