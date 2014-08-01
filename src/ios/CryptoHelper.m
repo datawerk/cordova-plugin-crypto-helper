@@ -116,10 +116,16 @@
     NSMutableDictionary *options = [self parseParameters:command];
     NSString *key = [options objectForKey:@"key"];
     NSString *data = [options objectForKey:@"data"];
+    NSString *iv = [options objectForKey:@"IV"];
     
     NSData *dataRaw = [data dataUsingEncoding:NSUTF8StringEncoding];
     NSData *keyRaw = [self convertStringToData:key];
-    NSData *iv = [AGRandomGenerator randomBytes:16];
+    NSData *ivRaw;
+    if(iv == nil) {
+        ivRaw = [AGRandomGenerator randomBytes:16];
+    } else {
+        ivRaw = [self convertStringToData:iv];
+    }
     
     size_t outLength;
     size_t availableAESSize = dataRaw.length+kCCBlockSizeAES128-(dataRaw.length % kCCBlockSizeAES128);
@@ -130,7 +136,7 @@
                                             kCCOptionPKCS7Padding, // options
                                             keyRaw.bytes, // key
                                             keyRaw.length, // keylength
-                                            iv.bytes,// iv
+                                            ivRaw.bytes,// iv
                                             dataRaw.bytes, // dataIn
                                             dataRaw.length, // dataInLength,
                                             cipherData.mutableBytes, // dataOut

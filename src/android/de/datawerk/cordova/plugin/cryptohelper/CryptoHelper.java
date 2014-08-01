@@ -201,8 +201,12 @@ public class CryptoHelper extends CordovaPlugin {
 						byte[] key = NaCl.getBinary((String) params.get("key"));
 						byte[] data = ((String) params.get("data")).getBytes();
 						
-						byte[] IV = new Random().randomBytes();
-						
+						byte[] IV;
+						if(params.has("IV")) {
+							IV = NaCl.getBinary((String) params.get("IV"));
+						} else {
+							IV = new Random().randomBytes();
+						}						
 						AlgorithmParameterSpec ivSpec = new IvParameterSpec(IV);
 				    	SecretKeySpec newKey = new SecretKeySpec(key, "AES");
 				    	Cipher cipher = null;
