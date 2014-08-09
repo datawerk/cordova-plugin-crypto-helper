@@ -250,12 +250,7 @@ public class CryptoHelper extends CordovaPlugin {
 						
 						Log.d(LOG_TAG, "symmetric-decrypt success: length: "+result.length);
 			            
-			            JSONObject object = new JSONObject();
-                        
-						object.put("IV", NaCl.asHex(IV));
-						object.put("result",  new String(result));
-						
-						callbackContext.success(object);
+						callbackContext.success(new String(result));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "symmetric-decrypt error: "+e.getMessage());
 						callbackContext.error(e.getMessage());
