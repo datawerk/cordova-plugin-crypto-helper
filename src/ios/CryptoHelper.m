@@ -149,7 +149,7 @@
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
         [results setValue:[self convertDataToString:cipherData] forKey:@"result"];
-        [results setValue:[self convertDataToString:iv] forKey:@"IV"];
+        [results setValue:[self convertDataToString:ivRaw] forKey:@"IV"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
