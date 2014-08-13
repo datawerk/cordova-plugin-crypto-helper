@@ -40,10 +40,6 @@
         	
 	<source-file src="src/android/de/datawerk/cordova/plugin/cryptohelper/CryptoHelper.java" target-dir="src/de/datawerk/cordova/plugin/cryptohelper/"/>	
         
-    <source-file src="src/android/libs/aerogear-crypto-0.1.0-SNAPSHOT.jar" target-dir="libs"/>
-    <source-file src="src/android/libs/sc-light-jdk15on-1.47.0.3.jar" target-dir="libs"/>
-    <source-file src="src/android/libs/scprov-jdk15on-1.47.0.3.jar" target-dir="libs"/>
-    <source-file src="src/android/libs/bcprov-jdk15on-1.48.jar" target-dir="libs"/>
   </platform>
 
   <!-- ios -->

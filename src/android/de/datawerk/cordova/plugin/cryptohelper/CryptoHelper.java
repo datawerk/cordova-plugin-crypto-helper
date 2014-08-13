@@ -1,20 +1,25 @@
 package de.datawerk.cordova.plugin.cryptohelper;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
-import org.jboss.aerogear.crypto.Random;
-import org.jboss.aerogear.crypto.password.Pbkdf2;
+//import org.jboss.aerogear.crypto.Random;
+//import org.jboss.aerogear.crypto.password.Pbkdf2;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +39,7 @@ public class CryptoHelper extends CordovaPlugin {
     }
     
 	@Override
-	public boolean execute(final String action, final JSONArray args,
-                           final CallbackContext callbackContext) throws JSONException {
+	public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         
 		if ("getRandomValue".equals(action)) {
 			Log.d(LOG_TAG, "getRandomValue called");
@@ -44,10 +48,9 @@ public class CryptoHelper extends CordovaPlugin {
 				public void run() {
 					try {
 						JSONObject params = (JSONObject) args.get(0);
-						int len = params.has("length") ? params
-                        .getInt("length") : 16;
+						int len = params.has("length") ? params.getInt("length") : 16;
                         
-						final byte[] bytes = new Random().randomBytes(len);
+						final byte[] bytes = randomBytes(len);
 						
 						Log.d(LOG_TAG, "getRandomValue success: "+NaCl.asHex(bytes));
 						callbackContext.success(NaCl.asHex(bytes));
@@ -65,18 +68,18 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
-						Pbkdf2 pbkdf2 = new Pbkdf2();
+						//Pbkdf2 pbkdf2 = new Pbkdf2();
                         
 						JSONObject params = (JSONObject) args.get(0);
 						String password = params.getString("password");
-						byte[] salt = params.has("salt") ? NaCl
-                        .getBinary(params.getString("salt")) : null;
+						byte[] salt = params.has("salt") ? NaCl.getBinary(params.getString("salt")) : null;
                         
-						byte[] encryptSalt = salt != null ? salt : new Random()
-                        .randomBytes();
-						byte[] rawPassword = pbkdf2.encrypt(password,
-                                                            encryptSalt);
-                        
+						byte[] encryptSalt = salt != null ? salt : randomBytes(16);
+						
+						SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+						KeySpec spec = new PBEKeySpec(password.toCharArray(), encryptSalt, 20000, 256);
+						byte[] rawPassword = keyFactory.generateSecret(spec).getEncoded();
+						
 						Log.d(LOG_TAG, "deriveKey success: "+NaCl.asHex(rawPassword));
 						callbackContext.success(NaCl.asHex(rawPassword));
 					} catch (Exception e) {
@@ -95,14 +98,14 @@ public class CryptoHelper extends CordovaPlugin {
 					try {
 						JSONObject params = (JSONObject) args.get(0);
 						String password = params.getString("password");
-						String encryptedPassword = params
-                        .getString("encryptedPassword");
+						String encryptedPassword = params.getString("encryptedPassword");
 						byte[] salt = NaCl.getBinary(params.getString("salt"));
                         
-						Pbkdf2 pbkdf2 = new Pbkdf2();
+						SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+						KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000, 256);
+						byte[] rawPassword = keyFactory.generateSecret(spec).getEncoded();
                         
-						boolean valid = pbkdf2.validate(password,
-                                                        NaCl.getBinary(encryptedPassword), salt);
+						boolean valid = Arrays.equals(NaCl.getBinary(encryptedPassword), rawPassword);
 						
 						Log.d(LOG_TAG, "validateKey success: "+valid);
 						callbackContext.success(String.valueOf(valid));
@@ -153,12 +156,9 @@ public class CryptoHelper extends CordovaPlugin {
 					
 					try {
 						JSONObject params = (JSONObject) args.get(0);
-						final String publicKey = (String) params
-                        .get("publicKey");
-						final String privateKey = (String) params
-                        .get("privateKey");
-						final byte[] nonce = NaCl.getBinary((String) params
-                                                            .get("nonce"));
+						final String publicKey = (String) params.get("publicKey");
+						final String privateKey = (String) params.get("privateKey");
+						final byte[] nonce = NaCl.getBinary((String) params.get("nonce"));
 						final String data = (String) params.get("data");
                         
 						Log.d(LOG_TAG, "decrypt or encrypt data length: "+data.length());
@@ -167,13 +167,11 @@ public class CryptoHelper extends CordovaPlugin {
                         
 						String result = null;
 						if ("encrypt".equals(action)) {
-							result = NaCl.asHex(cryptoBox.encrypt(
-                                                                  data.getBytes(), nonce));
+							result = NaCl.asHex(cryptoBox.encrypt(data.getBytes(), nonce));
 						}
                         
 						if ("decrypt".equals(action)) {
-							result = new String(cryptoBox.decrypt(
-                                                                  NaCl.getBinary(data), nonce));
+							result = new String(cryptoBox.decrypt(NaCl.getBinary(data), nonce));
 						}
                         
 						d = new Date();
@@ -205,8 +203,9 @@ public class CryptoHelper extends CordovaPlugin {
 						if(params.has("IV")) {
 							IV = NaCl.getBinary((String) params.get("IV"));
 						} else {
-							IV = new Random().randomBytes();
-						}						
+							IV = randomBytes(16);
+						}
+						
 						AlgorithmParameterSpec ivSpec = new IvParameterSpec(IV);
 				    	SecretKeySpec newKey = new SecretKeySpec(key, "AES");
 				    	Cipher cipher = null;
@@ -289,4 +288,17 @@ public class CryptoHelper extends CordovaPlugin {
         
 		return true;
 	}
+	
+	private static byte[] randomBytes(int n) {
+        byte[] buffer = new byte[n];
+        try {
+        	SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        	secureRandom.nextBytes(buffer);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        
+        return buffer;
+    }
+	
 }
