@@ -18,8 +18,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
-//import org.jboss.aerogear.crypto.Random;
-//import org.jboss.aerogear.crypto.password.Pbkdf2;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,10 +52,10 @@ public class CryptoHelper extends CordovaPlugin {
 						final byte[] bytes = randomBytes(len);
 						
 						Log.d(LOG_TAG, "getRandomValue success: "+NaCl.asHex(bytes));
-						callbackContext.success(NaCl.asHex(bytes));
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, NaCl.asHex(bytes)));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "getRandomValue error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -68,8 +67,6 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
-						//Pbkdf2 pbkdf2 = new Pbkdf2();
-                        
 						JSONObject params = (JSONObject) args.get(0);
 						String password = params.getString("password");
 						byte[] salt = params.has("salt") ? NaCl.getBinary(params.getString("salt")) : null;
@@ -81,10 +78,10 @@ public class CryptoHelper extends CordovaPlugin {
 						byte[] rawPassword = keyFactory.generateSecret(spec).getEncoded();
 						
 						Log.d(LOG_TAG, "deriveKey success: "+NaCl.asHex(rawPassword));
-						callbackContext.success(NaCl.asHex(rawPassword));
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, NaCl.asHex(rawPassword)));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "deriveKey error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -104,14 +101,14 @@ public class CryptoHelper extends CordovaPlugin {
 						SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 						KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000, 256);
 						byte[] rawPassword = keyFactory.generateSecret(spec).getEncoded();
-                        
+												
 						boolean valid = Arrays.equals(NaCl.getBinary(encryptedPassword), rawPassword);
 						
 						Log.d(LOG_TAG, "validateKey success: "+valid);
-						callbackContext.success(String.valueOf(valid));
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, String.valueOf(valid)));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "validateKey error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -137,10 +134,10 @@ public class CryptoHelper extends CordovaPlugin {
 						object.put("publicKey", NaCl.asHex(pk));
                         
 						Log.d(LOG_TAG, "generateKeyPair success: "+object);
-						callbackContext.success(object);
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, object));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "generateKeyPair error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -179,10 +176,10 @@ public class CryptoHelper extends CordovaPlugin {
 						Log.d(LOG_TAG, "decrypt or encrypt duration: "+duration);
 						Log.d(LOG_TAG, "decrypt or encrypt success: length: "+result.length());
 						
-						callbackContext.success(result);
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "decrypt or encrypt error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -204,7 +201,7 @@ public class CryptoHelper extends CordovaPlugin {
 							IV = NaCl.getBinary((String) params.get("IV"));
 						} else {
 							IV = randomBytes(16);
-						}
+						}						
 						
 						AlgorithmParameterSpec ivSpec = new IvParameterSpec(IV);
 				    	SecretKeySpec newKey = new SecretKeySpec(key, "AES");
@@ -220,10 +217,10 @@ public class CryptoHelper extends CordovaPlugin {
 						object.put("IV", NaCl.asHex(IV));
 						object.put("result", NaCl.asHex(result));
 						
-						callbackContext.success(object);
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, object));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "symmetric-encrypt error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -249,10 +246,10 @@ public class CryptoHelper extends CordovaPlugin {
 						
 						Log.d(LOG_TAG, "symmetric-decrypt success: length: "+result.length);
 			            
-						callbackContext.success(new String(result));
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, new String(result)));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "symmetric-decrypt error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
@@ -277,10 +274,11 @@ public class CryptoHelper extends CordovaPlugin {
 						}
                         
 						Log.d(LOG_TAG, "md5 success: "+sb.toString());
-						callbackContext.success(sb.toString());
+						
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, sb.toString()));
 					} catch (Exception e) {
 						Log.d(LOG_TAG, "md5 error: "+e.getMessage());
-						callbackContext.error(e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
 					}
 				}
 			});
