@@ -14,4 +14,8 @@
 - (void)decrypt:(CDVInvokedUrlCommand*)command;
 - (void)symmetricEncrypt:(CDVInvokedUrlCommand*)command;
 - (void)symmetricDecrypt:(CDVInvokedUrlCommand*)command;
++ (NSMutableData *)convertStringToData:(NSString *)hexString;
++ (NSString *)convertDataToString:(NSData *)data;
++ (NSString *)MD5String:(NSString *)data;
++ (NSString *)MD5StringFromData:(NSData *)data;
 @end

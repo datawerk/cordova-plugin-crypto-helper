@@ -16,7 +16,7 @@
     }
     
     NSData *data = [AGRandomGenerator randomBytes:len];
-    NSString *value = [self convertDataToString:data];
+    NSString *value = [CryptoHelper convertDataToString:data];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:value];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -28,9 +28,9 @@
     
     [self.commandDelegate runInBackground:^{
         AGPBKDF2 *agpbkdf2 = [[AGPBKDF2 alloc] init];
-        NSData *rawPassword = [agpbkdf2 deriveKey:password salt:[self convertStringToData:salt]];
+        NSData *rawPassword = [agpbkdf2 deriveKey:password salt:[CryptoHelper convertStringToData:salt]];
         
-        NSString *encodedPassword = [self convertDataToString:rawPassword];
+        NSString *encodedPassword = [CryptoHelper convertDataToString:rawPassword];
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedPassword];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
@@ -44,7 +44,7 @@
     
     [self.commandDelegate runInBackground:^{
         AGPBKDF2 *agpbkdf2 = [[AGPBKDF2 alloc] init];
-        BOOL valid = [agpbkdf2 validate:password encryptedPassword:[self convertStringToData:encryptedPassword] salt:[self convertStringToData:salt]];
+        BOOL valid = [agpbkdf2 validate:password encryptedPassword:[CryptoHelper convertStringToData:encryptedPassword] salt:[CryptoHelper convertStringToData:salt]];
         
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:valid];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -56,8 +56,8 @@
         AGKeyPair *keyPair = [[AGKeyPair alloc] init];
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
-        [results setValue:[self convertDataToString:keyPair.privateKey] forKey:@"privateKey"];
-        [results setValue:[self convertDataToString:keyPair.publicKey] forKey:@"publicKey"];
+        [results setValue:[CryptoHelper convertDataToString:keyPair.privateKey] forKey:@"privateKey"];
+        [results setValue:[CryptoHelper convertDataToString:keyPair.publicKey] forKey:@"publicKey"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -71,14 +71,14 @@
     NSString *nonce = [options objectForKey:@"nonce"];
     NSString *data = [options objectForKey:@"data"];
     
-    AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[self convertStringToData:publicKey] privateKey:[self convertStringToData:privateKey]];
+    AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[CryptoHelper convertStringToData:publicKey] privateKey:[CryptoHelper convertStringToData:privateKey]];
     [self.commandDelegate runInBackground:^{
         NSError *error = nil;
         NSData *message = [data dataUsingEncoding:NSUTF8StringEncoding];
-        NSData *result = [cryptoBox encrypt:message nonce:[self convertStringToData:nonce] error:&error];
+        NSData *result = [cryptoBox encrypt:message nonce:[CryptoHelper convertStringToData:nonce] error:&error];
         
         if(error == nil) {
-            NSString *encodedResult = [self convertDataToString:result];
+            NSString *encodedResult = [CryptoHelper convertDataToString:result];
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:encodedResult];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         } else {
@@ -95,11 +95,11 @@
     NSString *nonce = [options objectForKey:@"nonce"];
     NSString *data = [options objectForKey:@"data"];
     
-    AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[self convertStringToData:publicKey] privateKey:[self convertStringToData:privateKey]];
+    AGCryptoBox *cryptoBox = [[AGCryptoBox alloc] initWithKey:[CryptoHelper convertStringToData:publicKey] privateKey:[CryptoHelper convertStringToData:privateKey]];
     [self.commandDelegate runInBackground:^{
         NSError *error = nil;
-        NSData *message = [self convertStringToData:data];
-        NSData *result = [cryptoBox decrypt:message nonce:[self convertStringToData:nonce] error:&error];
+        NSData *message = [CryptoHelper convertStringToData:data];
+        NSData *result = [cryptoBox decrypt:message nonce:[CryptoHelper convertStringToData:nonce] error:&error];
         
         if(error == nil) {
             NSString *encodedResult = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
@@ -119,12 +119,12 @@
     NSString *iv = [options objectForKey:@"IV"];
     
     NSData *dataRaw = [data dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *keyRaw = [self convertStringToData:key];
+    NSData *keyRaw = [CryptoHelper convertStringToData:key];
     NSData *ivRaw;
     if(iv == nil) {
         ivRaw = [AGRandomGenerator randomBytes:16];
     } else {
-        ivRaw = [self convertStringToData:iv];
+        ivRaw = [CryptoHelper convertStringToData:iv];
     }
     
     size_t outLength;
@@ -148,8 +148,8 @@
         cipherData.length = outLength;
         
         NSMutableDictionary *results = [NSMutableDictionary dictionary];
-        [results setValue:[self convertDataToString:cipherData] forKey:@"result"];
-        [results setValue:[self convertDataToString:ivRaw] forKey:@"IV"];
+        [results setValue:[CryptoHelper convertDataToString:cipherData] forKey:@"result"];
+        [results setValue:[CryptoHelper convertDataToString:ivRaw] forKey:@"IV"];
         
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -165,9 +165,9 @@
     NSString *data = [options objectForKey:@"data"];
     NSString *iv = [options objectForKey:@"IV"];
     
-    NSData *dataRaw = [self convertStringToData:data];
-    NSData *keyRaw = [self convertStringToData:key];
-    NSData *ivRaw = [self convertStringToData:iv];
+    NSData *dataRaw = [CryptoHelper convertStringToData:data];
+    NSData *keyRaw = [CryptoHelper convertStringToData:key];
+    NSData *ivRaw = [CryptoHelper convertStringToData:iv];
     
     size_t outLength;
     size_t availableAESSize = dataRaw.length-(dataRaw.length % kCCBlockSizeAES128);
@@ -206,14 +206,14 @@
     
     [self.commandDelegate runInBackground:^{
         
-        NSString *md5String = [self MD5String:data];
+        NSString *md5String = [CryptoHelper MD5String:data];
         
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:md5String];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
 }
 
-- (NSMutableData *)convertStringToData:(NSString *)hexString {
++ (NSMutableData *)convertStringToData:(NSString *)hexString {
     NSMutableData *commandToSend = [[NSMutableData alloc] init];
     long byte;
     char bytes[3] = {'\0', '\0', '\0'};
@@ -227,7 +227,7 @@
     return commandToSend;
 }
 
-- (NSString *)MD5String:(NSString *)data {
++ (NSString *)MD5String:(NSString *)data {
     const char *cstr = [data UTF8String];
     
     unsigned char result[16];
@@ -242,7 +242,20 @@
             ];
 }
 
-- (NSString *)convertDataToString:(NSData *)data {
++ (NSString *)MD5StringFromData:(NSData *)data {
+    unsigned char result[16];
+    CC_MD5(data.bytes, data.length, result);
+    
+    return [NSString stringWithFormat:
+            @"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+            result[0], result[1], result[2], result[3],
+            result[4], result[5], result[6], result[7],
+            result[8], result[9], result[10], result[11],
+            result[12], result[13], result[14], result[15]
+            ];
+}
+
++ (NSString *)convertDataToString:(NSData *)data {
     const unsigned char *dataBuffer = (const unsigned char *) [data bytes];
     
     if (!dataBuffer) {
