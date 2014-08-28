@@ -38,7 +38,7 @@ public class CryptoHelper extends CordovaPlugin {
     }
     
 	@Override
-	public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public boolean execute(final String action, final String rawArgs, final CallbackContext callbackContext) throws JSONException {
         
 		if ("getRandomValue".equals(action)) {
 			Log.d(LOG_TAG, "getRandomValue called");
@@ -46,6 +46,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						int len = params.has("length") ? params.getInt("length") : 16;
                         
@@ -67,6 +68,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						String password = params.getString("password");
 						byte[] salt = params.has("salt") ? NaCl.getBinary(params.getString("salt")) : null;
@@ -93,6 +95,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						String password = params.getString("password");
 						String encryptedPassword = params.getString("encryptedPassword");
@@ -152,6 +155,7 @@ public class CryptoHelper extends CordovaPlugin {
 					long startAt = d.getTime();
 					
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						final String publicKey = (String) params.get("publicKey");
 						final String privateKey = (String) params.get("privateKey");
@@ -191,6 +195,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						
 						byte[] key = NaCl.getBinary((String) params.get("key"));
@@ -232,6 +237,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						
 						byte[] key = NaCl.getBinary((String) params.get("key"));
@@ -261,7 +267,7 @@ public class CryptoHelper extends CordovaPlugin {
 			cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					try {
-                        
+						JSONArray args = new JSONArray(rawArgs);
 						JSONObject params = (JSONObject) args.get(0);
 						String data = params.getString("data");
                         
