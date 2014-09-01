@@ -261,6 +261,50 @@ public class CryptoHelper extends CordovaPlugin {
 			});
 		}
 		
+		if ("symmetricDecryptBatch".equals(action)) {
+			Log.d(LOG_TAG, "symmetric-decrypt-batch called");
+			
+			cordova.getThreadPool().execute(new Runnable() {
+				public void run() {
+					try {
+						JSONArray args = new JSONArray(rawArgs);
+						JSONObject params = (JSONObject) args.get(0);
+						JSONArray dataArray = (JSONArray) args.get(1);
+						
+						byte[] key = NaCl.getBinary((String) params.get("key"));
+						byte[] IV = NaCl.getBinary((String) params.get("IV"));
+						
+						JSONArray results = new JSONArray();
+						
+						for (int i = 0; i < dataArray.length(); i++) {
+							JSONObject dataObject = (JSONObject) dataArray.get(i);
+							
+							byte[] data = NaCl.getBinary(dataObject.getString("data"));
+							
+							try {
+								AlgorithmParameterSpec ivSpec = new IvParameterSpec(IV);
+								SecretKeySpec newKey = new SecretKeySpec(key, "AES");
+								Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+								cipher.init(Cipher.DECRYPT_MODE, newKey, ivSpec);
+								byte[] result = cipher.doFinal(data);
+								
+								dataObject.put("data", new String(result));
+							} catch (Exception e) {
+								dataObject.put("data", "");
+							}
+							
+							results.put(dataObject);
+						}
+						
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, results));
+					} catch (Exception e) {
+						Log.d(LOG_TAG, "symmetric-decrypt error: "+e.getMessage());
+						callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
+					}
+				}
+			});
+		}
+		
 		if ("md5".equals(action)) {
 			Log.d(LOG_TAG, "md5 called");
 			
