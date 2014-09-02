@@ -200,6 +200,55 @@
     }
 }
 
+- (void)symmetricDecryptBatch:(CDVInvokedUrlCommand *)command {
+    NSMutableDictionary *options = [command argumentAtIndex:0];
+    NSString *key = [options objectForKey:@"key"];
+    NSString *iv = [options objectForKey:@"IV"];
+    
+    NSData *keyRaw = [CryptoHelper convertStringToData:key];
+    NSData *ivRaw = [CryptoHelper convertStringToData:iv];
+    
+    NSArray* batch = [command argumentAtIndex:1];
+    
+    NSMutableArray *results = [NSMutableArray array];
+    for (NSMutableDictionary *dataObject in batch) {
+        NSString *data = [dataObject objectForKey:@"data"];
+        NSData *dataRaw = [CryptoHelper convertStringToData:data];
+        
+        size_t outLength;
+        size_t availableAESSize = dataRaw.length-(dataRaw.length % kCCBlockSizeAES128);
+        NSMutableData *cipherData = [NSMutableData dataWithLength:availableAESSize];
+        
+        CCCryptorStatus cryptorResult = CCCrypt(kCCDecrypt, // operation
+                                                kCCAlgorithmAES, // Algorithm
+                                                kCCOptionPKCS7Padding, // options
+                                                keyRaw.bytes, // key
+                                                keyRaw.length, // keylength
+                                                ivRaw.bytes,// iv
+                                                dataRaw.bytes, // dataIn
+                                                dataRaw.length, // dataInLength,
+                                                cipherData.mutableBytes, // dataOut
+                                                cipherData.length, // dataOutAvailable
+                                                &outLength); // dataOutMoved
+        
+        
+        if (cryptorResult == kCCSuccess) {
+            cipherData.length = outLength;
+            
+            NSString *result = [[NSString alloc] initWithData:cipherData encoding:NSUTF8StringEncoding];
+            
+            [dataObject setObject:result forKey:@"data"];
+            [results addObject:dataObject];
+        } else {
+            [dataObject setObject:@"" forKey:@"data"];
+            [results addObject:dataObject];
+        }
+    }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:results];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)md5:(CDVInvokedUrlCommand *)command {
     NSMutableDictionary *options = [self parseParameters:command];
     NSString *data = [options objectForKey:@"data"];
